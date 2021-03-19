@@ -53,7 +53,6 @@ procedure Befunge is
    columns : Integer := 0;
 
    --flag to stop program execution 
-   --TODO: ask about OS library to halt execution
    running : Boolean := True;
 
 begin
