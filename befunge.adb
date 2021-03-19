@@ -3,7 +3,7 @@ with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with StackPkg;
 procedure Befunge is
 
-   --An unconstrained 2 dimensional that holds characters representing Befunge insturctions
+   --An unconstrained 2 dimensional array that holds characters representing Befunge insturctions
    type Grid is array(Natural range <>, Natural range<>) of Character;
 
    --Record that contains an x and y value
@@ -48,7 +48,7 @@ procedure Befunge is
    --TODO: should this be declared here? Better suited when the grid is instantiated?
    s: Stack;
 
-   --Grid dimensions that will be obtained from input file.
+   --Grid dimensions that will be obtained from input file
    rows : Integer := 0;
    columns : Integer := 0;
 
@@ -90,23 +90,24 @@ begin
             when '^' => instrPointer.dir := UP;
             when 'v' => instrPointer.dir := DOWN;
 
-            --is this the best way to terminate?
+            --Terminate the program
+            --is this the best way? As about OS library for exiting
             when '@' => running := False;
                --DEBUG: 
                --Put("hit the @ symbol");
                
-            --Push the integer value the char represents to the stack.
+            --Push the integer value the char represents to the stack
             when '0'..'9' => Push(Character'Pos(c) - asciiIntegerOffset, s);
 
-            --Pop 
+            --Pop top value from stack, display it to the console
             when '.' => Put(Top(s), Width => 0);
                Put(" ");
                Pop(s);
-            --Pop value from top of stack, and discard it.
+            --Pop value from top of stack, and discard it
             when '$' => Pop(s);
             --Do nothing
             when ' ' => null;
-            --eventaully 'others' will mean an invalid input was caught, throw a custom exception (or a data error?)
+            --TODO: 'others' will mean an invalid input was consumed, throw a custom exception (or a data error?), then terminate the program
             when others => null;
          end case;
       end PerformInstruction;
@@ -123,7 +124,6 @@ begin
       end PrintCurrentLocation;
 
       --DEBUG: Prints the current state of the instruction grid
-      --TODO: relocate the performInstuction calls to a separate procedure for traversing the grid
       procedure PrintGridState is
       begin
          for I in 1..rows loop
@@ -134,8 +134,6 @@ begin
          end loop;
       end PrintGridState;
 
-
-
    begin
       PopulateGrid(instructionGrid, rows, columns);
       
@@ -144,7 +142,7 @@ begin
          ChangeGridPosition (instrPointer);
       end loop;
 
-      --DEBUG:
+      --DEBUG: Properly exited the while loop
       Put("Exit");
 
    end;
