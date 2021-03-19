@@ -6,12 +6,23 @@ procedure Befunge is
    --An unconstrained 2 dimensional that holds characters representing Befunge insturctions
    type Grid is array(Natural range <>, Natural range<>) of Character;
 
+   --Record that contains an x and y value
    type Pair is record
-      xPos : Integer;
-      yPos : Integer;
+      x : Integer;
+      y : Integer;
    end record;
 
-   --Consumes the first two values from the input file, the dimensions of the grid, and stores them.
+   --Enum to name the four cardnial directions we can travel within the grid
+   type Direction is (UP, DOWN, LEFT, RIGHT);
+
+   --A pointer that will keep track of our current position in the grid,
+   --as well as the current direction it is moving
+   type InstructionPointer is record
+      dir : Direction := Right;
+      pos : Pair := (1,1);
+   end record;
+
+   --Consumes the first two values from the input file and stores them.
    procedure GetRowsAndColumns(r, c : in out Integer) is
    begin
       Get(r);
@@ -34,12 +45,14 @@ procedure Befunge is
 
 
    --[Program fields]
-   --TODO: should s remain uninitialized? How to even initialize?
+   --TODO: should this be declared here? Better suited when the grid is instantiated?
    s: Stack;
 
    --Grid dimensions that will be obtained from input file.
    rows : Integer := 0;
    columns : Integer := 0;
+
+
 
 begin
 
@@ -49,54 +62,58 @@ begin
    declare
       --Instantiate the grid given the row and column inputs
       instructionGrid : Grid(1..rows, 1..columns);
-      --Current position of the instruction pointer, defaulting to top left
-      currentPosition : Pair := (1,1);
 
 
+      instrPointer : InstructionPointer;
 
-      procedure PerformInstrcution(c : Character) is
+
+      --Looks up and performs the appropriate action given the instruction character
+      procedure PerformInstruction(c : Character) is
+         asciiIntegerOffset : constant Integer := 48;
       begin
          case c is
-            --Integers to push to the stack
-            when '0' => Push(0, s);
-            when '1' => Push(1, s);
-            when '2' => Push(2, s);
-            when '3' => Push(3, s);
-            when '4' => Push(4, s);
-            when '5' => Push(5, s);
-            when '6' => Push(6, s);
-            when '7' => Push(7, s);
-            when '8' => Push(8, s);
-            when '9' => Push(9, s);
+            when '>' => instrPointer.dir := RIGHT;
+            when '<' => instrPointer.dir := LEFT;
+            when '^' => instrPointer.dir := UP;
+            when 'v' => instrPointer.dir := DOWN;
+
+            --IDEA: make a flag like "running" set to true initially. Check running in a while loop
+            -- between grid movements, if false should terminate the program
+            when '@' => Put("How to terminate program without goto?");
+
+            when '0'..'9' => Push(Character'Pos(c) - asciiIntegerOffset, s);
 
             when '.' => Put(Top(s), Width => 0);
-                        Pop(s);
-            when '@' => Put("How to terminate program??");
+               Put(" ");
+               Pop(s);
+            when '$' => Pop(s);
 
 
+
+            --eventaully 'others' will mean an invalid input was caught, throw a custom exception (or a data error?)
             when others => null;
          end case;
-      end PerformInstrcution;
+      end PerformInstruction;
 
       --For Debugging: Prints current grid coordinates, and the char at that location if showCharAtPos is TRUE
       procedure PrintCurrentLocation(showCharAtPos : Boolean) is
       begin
-         Put(currentPosition.xPos); Put(currentPosition.yPos);
+         Put(instrPointer.pos.x); Put(instrPointer.pos.y);
          if showCharAtPos then
             Put_Line("");
-            Put(instructionGrid(currentPosition.xPos, currentPosition.yPos));
+            Put(instructionGrid(instrPointer.pos.x, instrPointer.pos.y));
             Put_Line("");
                 end if;
       end PrintCurrentLocation;
 
       --For Debugging: Prints the current state of the instruction grid
-      --TODO: relocate the performInstuction calls to a separate procedure
+      --TODO: relocate the performInstuction calls to a separate procedure for traversing the grid
       procedure PrintGridState is
       begin
          for I in 1..rows loop
             for J in 1..columns loop
                --Put(instructionGrid(I,J));
-               PerformInstrcution(instructionGrid(I,J));
+               PerformInstruction(instructionGrid(I,J));
             end loop;
             --Put_Line("");
          end loop;
