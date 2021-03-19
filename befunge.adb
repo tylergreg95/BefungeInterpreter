@@ -52,7 +52,8 @@ procedure Befunge is
    rows : Integer := 0;
    columns : Integer := 0;
 
-
+   --flag to stop program execution
+   running : Boolean := True;
 
 begin
 
@@ -62,10 +63,19 @@ begin
    declare
       --Instantiate the grid given the row and column inputs
       instructionGrid : Grid(1..rows, 1..columns);
-
-
       instrPointer : InstructionPointer;
 
+      procedure ChangeGridPosition(insPntr : in out InstructionPointer) is
+      begin
+         case insPntr.dir is
+            when RIGHT => insPntr.pos.x := insPntr.pos.x + 1;
+            when UP => insPntr.pos.y := insPntr.pos.y - 1;
+            when DOWN => insPntr.pos.y := insPntr.pos.y + 1;
+            when LEFT => insPntr.pos.x := insPntr.pos.x - 1;
+            when others => null;
+         end case;
+
+      end ChangeGridPosition;
 
       --Looks up and performs the appropriate action given the instruction character
       procedure PerformInstruction(c : Character) is
@@ -77,18 +87,15 @@ begin
             when '^' => instrPointer.dir := UP;
             when 'v' => instrPointer.dir := DOWN;
 
-            --IDEA: make a flag like "running" set to true initially. Check running in a while loop
-            -- between grid movements, if false should terminate the program
-            when '@' => Put("How to terminate program without goto?");
-
+            --is this the best way to terminate?
+            when '@' => running := False;
+               Put("hit the @ symbol");
             when '0'..'9' => Push(Character'Pos(c) - asciiIntegerOffset, s);
 
             when '.' => Put(Top(s), Width => 0);
                Put(" ");
                Pop(s);
             when '$' => Pop(s);
-
-
 
             --eventaully 'others' will mean an invalid input was caught, throw a custom exception (or a data error?)
             when others => null;
@@ -112,10 +119,9 @@ begin
       begin
          for I in 1..rows loop
             for J in 1..columns loop
-               --Put(instructionGrid(I,J));
-               PerformInstruction(instructionGrid(I,J));
+               Put(instructionGrid(I,J));
             end loop;
-            --Put_Line("");
+            Put_Line("");
          end loop;
       end PrintGridState;
 
@@ -123,9 +129,13 @@ begin
 
    begin
       PopulateGrid(instructionGrid, rows, columns);
-      PrintGridState;
+      
+      while running loop
+         PerformInstruction(instructionGrid(instrPointer.pos.y, instrPointer.pos.x));
+         ChangeGridPosition (instrPointer);
+      end loop;
 
-
+      Put("Exit");
 
    end;
 end Befunge;
