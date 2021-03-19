@@ -52,7 +52,8 @@ procedure Befunge is
    rows : Integer := 0;
    columns : Integer := 0;
 
-   --flag to stop program execution
+   --flag to stop program execution 
+   --TODO: ask about OS library to halt execution
    running : Boolean := True;
 
 begin
@@ -79,9 +80,11 @@ begin
 
       --Looks up and performs the appropriate action given the instruction character
       procedure PerformInstruction(c : Character) is
+         --Constant to convert char representations of integers to their integer value
          asciiIntegerOffset : constant Integer := 48;
       begin
          case c is
+            --Change the direction of the pointer
             when '>' => instrPointer.dir := RIGHT;
             when '<' => instrPointer.dir := LEFT;
             when '^' => instrPointer.dir := UP;
@@ -89,20 +92,26 @@ begin
 
             --is this the best way to terminate?
             when '@' => running := False;
-               Put("hit the @ symbol");
+               --DEBUG: 
+               --Put("hit the @ symbol");
+               
+            --Push the integer value the char represents to the stack.
             when '0'..'9' => Push(Character'Pos(c) - asciiIntegerOffset, s);
 
+            --Pop 
             when '.' => Put(Top(s), Width => 0);
                Put(" ");
                Pop(s);
+            --Pop value from top of stack, and discard it.
             when '$' => Pop(s);
-
+            --Do nothing
+            when ' ' => null;
             --eventaully 'others' will mean an invalid input was caught, throw a custom exception (or a data error?)
             when others => null;
          end case;
       end PerformInstruction;
 
-      --For Debugging: Prints current grid coordinates, and the char at that location if showCharAtPos is TRUE
+      --DEBUG: Prints current grid coordinates, and the char at that location if showCharAtPos is TRUE
       procedure PrintCurrentLocation(showCharAtPos : Boolean) is
       begin
          Put(instrPointer.pos.x); Put(instrPointer.pos.y);
@@ -113,7 +122,7 @@ begin
                 end if;
       end PrintCurrentLocation;
 
-      --For Debugging: Prints the current state of the instruction grid
+      --DEBUG: Prints the current state of the instruction grid
       --TODO: relocate the performInstuction calls to a separate procedure for traversing the grid
       procedure PrintGridState is
       begin
@@ -135,6 +144,7 @@ begin
          ChangeGridPosition (instrPointer);
       end loop;
 
+      --DEBUG:
       Put("Exit");
 
    end;
