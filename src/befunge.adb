@@ -64,7 +64,7 @@ begin
       --Instantiate the grid given the row and column inputs
       instructionGrid : Grid(1..rows, 1..columns);
       instrPointer : InstructionPointer;
-
+      isOutOfBounds : Boolean := False;
       procedure ChangeGridPosition(insPntr : in out InstructionPointer) is
       begin
          case insPntr.dir is
@@ -111,6 +111,13 @@ begin
          end case;
       end PerformInstruction;
 
+      procedure CheckBounds(status : in out Boolean; xPos, yPos: in Integer) is
+      begin
+         if xPos > columns or xPos < 1 or yPos > rows or yPos < 1 then
+            status := True;
+         end if; 
+      end CheckBounds;
+
       --DEBUG: Prints current grid coordinates, and the char at that location if showCharAtPos is TRUE
       procedure PrintCurrentLocation(showCharAtPos : Boolean) is
       begin
@@ -137,8 +144,19 @@ begin
       PopulateGrid(instructionGrid, rows, columns);
       
       while running loop
-         PerformInstruction(instructionGrid(instrPointer.pos.y, instrPointer.pos.x));
-         ChangeGridPosition (instrPointer);
+         --Every iteration, check if the pointer is out of bounds
+         CheckBounds(isOutOfBounds, instrPointer.pos.x, instrPointer.pos.y);
+         --If the pointer is out of bounds, display an error message and terminate the program
+         if isOutOfBounds then
+            running := False;
+            Put("Error: Out of bounds");
+            Put_Line("");
+         --If the pointer is in bounds, perform the instruction, then move to the next position.0
+         else
+            PerformInstruction(instructionGrid(instrPointer.pos.y, instrPointer.pos.x));
+            ChangeGridPosition (instrPointer);
+         end if;
+         
       end loop;
 
       --DEBUG: Properly exited the while loop
