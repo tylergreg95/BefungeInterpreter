@@ -104,6 +104,9 @@ begin
                Pop(s);
             --Pop value from top of stack, and discard it
             when '$' => Pop(s);
+
+            --Duplicate the top value of the stack
+            when ':' => Push(Top(s), s);
             --Do nothing
             when ' ' => null;
             --TODO: 'others' will mean an invalid input was consumed, throw a custom exception (or a data error?), then terminate the program
