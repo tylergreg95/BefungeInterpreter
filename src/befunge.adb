@@ -77,6 +77,18 @@ begin
 
       end ChangeGridPosition;
 
+      procedure SwapTopTwoStackElements is
+         num1 : Integer;
+         num2 : Integer;
+      begin
+         num1 := Top(s);
+         Pop(s);
+         num2 := Top(s);
+         Pop(s);
+         Push(num1, s);
+         Push(num2, s);
+      end SwapTopTwoStackElements;
+
       --Looks up and performs the appropriate action given the instruction character
       procedure PerformInstruction(c : Character) is
          --Constant to convert char representations of integers to their integer value
@@ -107,10 +119,18 @@ begin
 
             --Duplicate the top value of the stack
             when ':' => Push(Top(s), s);
+
+            when '\' => SwapTopTwoStackElements;
+            when '_' => null;
+            when '|' => null;
+
+
             --Do nothing
             when ' ' => null;
-            --TODO: 'others' will mean an invalid input was consumed, throw a custom exception (or a data error?), then terminate the program
-            when others => null;
+            --An invalid instruction was passed
+            when others => running := False;
+               Put("Error: Invalid Instruction");
+               Put_Line("");
          end case;
       end PerformInstruction;
 
