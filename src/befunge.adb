@@ -55,6 +55,10 @@ procedure Befunge is
    --flag to stop program execution 
    running : Boolean := True;
 
+   --Integer variables for arithmetic operations
+   num1 : Integer;
+   num2 : Integer;
+
 begin
 
    --Get the values for row and column
@@ -77,6 +81,7 @@ begin
 
       end ChangeGridPosition;
 
+      --Pop the first two elements off the stack, then push them back, effectively swapping their positions
       procedure SwapTopTwoStackElements is
          num1 : Integer;
          num2 : Integer;
@@ -89,6 +94,20 @@ begin
          Push(num2, s);
       end SwapTopTwoStackElements;
 
+      --Adds, subtracts, multiplies, or divides two numbers.
+      function PerformArithmeticOperation(operation : in Character; num1, num2 : in Integer) return Integer is
+      result : Integer;
+      begin
+         case operation is
+            when '+' => result := num1 + num2;
+            when '-' => result := num1 - num2;
+            when '*' => result := num1 * num2;
+            when '/' => result := num1 / num2;
+            when others => null;
+         end case;
+
+         return result;
+      end PerformArithmeticOperation;
       --Looks up and performs the appropriate action given the instruction character
       procedure PerformInstruction(c : Character) is
          --Constant to convert char representations of integers to their integer value
@@ -101,14 +120,20 @@ begin
             when '^' => instrPointer.dir := UP;
             when 'v' => instrPointer.dir := DOWN;
 
-            --Terminate the program
-            --is this the best way? As about OS library for exiting
+            --Terminate the program 
             when '@' => running := False;
-               --DEBUG: 
+               --DEBUG:
                --Put("hit the @ symbol");
                
             --Push the integer value the char represents to the stack
             when '0'..'9' => Push(Character'Pos(c) - asciiIntegerOffset, s);
+
+            when '+' | '-' | '*' | '/' => num1 := Top(s);
+               Pop(s);
+               num2 := Top(s);
+               Pop(s);
+               Push(PerformArithmeticOperation(c, num1, num2), s);
+
 
             --Pop top value from stack, display it to the console
             when '.' => Put(Top(s), Width => 0);
@@ -120,7 +145,10 @@ begin
             --Duplicate the top value of the stack
             when ':' => Push(Top(s), s);
 
+            --Swap the top two elements of the stack
             when '\' => SwapTopTwoStackElements;
+
+
             when '_' => null;
             when '|' => null;
 
