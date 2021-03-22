@@ -56,8 +56,8 @@ procedure Befunge is
    running : Boolean := True;
 
    --Integer variables for arithmetic operations
-   num1 : Integer;
-   num2 : Integer;
+   x : Integer;
+   y : Integer;
 
 begin
 
@@ -128,11 +128,14 @@ begin
             --Push the integer value the char represents to the stack
             when '0'..'9' => Push(Character'Pos(c) - asciiIntegerOffset, s);
 
-            when '+' | '-' | '*' | '/' => num1 := Top(s);
+            --Pops two values form the stack, performs arithmetic based off the operator in the form of
+            --secondValue oeprator firstValue
+            --TODO: Verify operand position is correct according to proj3 spec
+            when '+' | '-' | '*' | '/' => x := Top(s);
                Pop(s);
-               num2 := Top(s);
+               y := Top(s);
                Pop(s);
-               Push(PerformArithmeticOperation(c, num1, num2), s);
+               Push(PerformArithmeticOperation(c, y, x), s);
 
 
             --Pop top value from stack, display it to the console
@@ -149,8 +152,18 @@ begin
             when '\' => SwapTopTwoStackElements;
 
 
-            when '_' => null;
-            when '|' => null;
+            when '_' => if Top(s) = 0 then
+                  instrPointer.dir := RIGHT;
+               else
+                  instrPointer.dir := LEFT;
+               end if;
+               Pop(s);
+            when '|' => if Top(s) = 0 then
+                  instrPointer.dir := DOWN;
+               else
+                  instrPointer.dir := UP;
+               end if;
+               Pop(s);
 
 
             --Do nothing
@@ -211,7 +224,7 @@ begin
       end loop;
 
       --DEBUG: Properly exited the while loop
-      Put("Exit");
+      --Put("Exit");
 
    end;
 end Befunge;
