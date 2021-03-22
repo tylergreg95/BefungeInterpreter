@@ -151,13 +151,15 @@ begin
             --Swap the top two elements of the stack
             when '\' => SwapTopTwoStackElements;
 
-
+            --Pop a value form the stack, change instructionPointer to a horizontal direction based on popped value
             when '_' => if Top(s) = 0 then
                   instrPointer.dir := RIGHT;
                else
                   instrPointer.dir := LEFT;
                end if;
                Pop(s);
+
+            --Pop a value form the stack, change instructionPointer to a vertical direction based on popped value
             when '|' => if Top(s) = 0 then
                   instrPointer.dir := DOWN;
                else
