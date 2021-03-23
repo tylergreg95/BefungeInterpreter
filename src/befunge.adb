@@ -1,3 +1,11 @@
+--This program is an interpreter for a limited set of instructions for the esoteric programming language Befunge.
+--The program operates by reading in the following:
+--    --r: An Integer representing how many rows the instruciton grid will contain.
+--    --c: An Integer representing how many columns the instruciton grid will contain.
+--    --The rest of the input will be a sequence of characters to populate the grid.
+--    --The program does not read until end of file, it reads in only the first n characters after the first two
+--       integers, where n = r * c.
+
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with StackPkg;
@@ -16,13 +24,13 @@ procedure Befunge is
    type Direction is (UP, DOWN, LEFT, RIGHT);
 
    --A pointer that will keep track of our current position in the grid,
-   --as well as the current direction it is moving
+   --as well as the current direction instrucitons are being executed
    type InstructionPointer is record
       dir : Direction := Right;
       pos : Pair := (1,1);
    end record;
 
-   --Consumes the first two values from the input file and stores them.
+   --Consumes the first two values from the input file and stores them
    procedure GetRowsAndColumns(r, c : in out Integer) is
    begin
       Get(r);
@@ -45,7 +53,7 @@ procedure Befunge is
    use myStackPkg;
 
 
-   --[Program fields]
+   --[Main loop fields]
    --TODO: should this be declared here? Better suited when the grid is instantiated?
    s: Stack;
 
@@ -109,7 +117,7 @@ begin
 
          return result;
       end PerformArithmeticOperation;
-      
+
       --Looks up and performs the appropriate action given the instruction character
       procedure PerformInstruction(c : Character) is
          --Constant to convert char representations of integers to their integer value
@@ -176,6 +184,16 @@ begin
                Put("Error: Invalid Instruction");
                Put_Line("");
          end case;
+
+         exception
+            when Stack_Full =>
+               Put("Error: Stack Overflow");
+               Put_Line("");
+               running := false;
+            when Stack_Empty =>
+               Put("Error: Attempted to access top element from an empty stack");
+               Put_Line("");
+               running := false;
       end PerformInstruction;
 
       procedure CheckBounds(status : in out Boolean; xPos, yPos: in Integer) is
