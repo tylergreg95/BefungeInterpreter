@@ -39,7 +39,8 @@ procedure Befunge is
       end loop;
    end;
 
-   --Implement the StackPkg, using a size defined in the project specification.
+   --Implement the StackPkg, using a size defined in the project specification. Since the only functions
+   --that push to the stack push Integers, the ItemType is Integer.
    package myStackPkg is new StackPkg(Size => 1000, ItemType => Integer);
    use myStackPkg;
 
@@ -108,6 +109,7 @@ begin
 
          return result;
       end PerformArithmeticOperation;
+      
       --Looks up and performs the appropriate action given the instruction character
       procedure PerformInstruction(c : Character) is
          --Constant to convert char representations of integers to their integer value
@@ -130,18 +132,17 @@ begin
 
             --Pops two values form the stack, performs arithmetic based off the operator in the form of
             --secondValue oeprator firstValue
-            --TODO: Verify operand position is correct according to proj3 spec
             when '+' | '-' | '*' | '/' => x := Top(s);
                Pop(s);
                y := Top(s);
                Pop(s);
                Push(PerformArithmeticOperation(c, y, x), s);
 
-
             --Pop top value from stack, display it to the console
             when '.' => Put(Top(s), Width => 0);
                Put(" ");
                Pop(s);
+
             --Pop value from top of stack, and discard it
             when '$' => Pop(s);
 
@@ -151,7 +152,7 @@ begin
             --Swap the top two elements of the stack
             when '\' => SwapTopTwoStackElements;
 
-            --Pop a value form the stack, change instructionPointer to a horizontal direction based on popped value
+            --Pop a value from the stack, change instructionPointer to a horizontal direction based on popped value
             when '_' => if Top(s) = 0 then
                   instrPointer.dir := RIGHT;
                else
@@ -159,7 +160,7 @@ begin
                end if;
                Pop(s);
 
-            --Pop a value form the stack, change instructionPointer to a vertical direction based on popped value
+            --Pop a value from the stack, change instructionPointer to a vertical direction based on popped value
             when '|' => if Top(s) = 0 then
                   instrPointer.dir := DOWN;
                else
@@ -167,9 +168,9 @@ begin
                end if;
                Pop(s);
 
-
             --Do nothing
             when ' ' => null;
+
             --An invalid instruction was passed
             when others => running := False;
                Put("Error: Invalid Instruction");
@@ -217,16 +218,13 @@ begin
             running := False;
             Put("Error: Out of bounds");
             Put_Line("");
-         --If the pointer is in bounds, perform the instruction, then move to the next position.0
+         --If the pointer is in bounds, perform the instruction, then move to the next position
          else
             PerformInstruction(instructionGrid(instrPointer.pos.y, instrPointer.pos.x));
             ChangeGridPosition (instrPointer);
          end if;
          
       end loop;
-
-      --DEBUG: Properly exited the while loop
-      --Put("Exit");
 
    end;
 end Befunge;
