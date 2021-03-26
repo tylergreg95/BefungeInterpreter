@@ -1,5 +1,5 @@
 --This program is an interpreter for a limited set of instructions for the esoteric programming language Befunge.
---The program operates by reading in the following:
+--The program operates by reading in the following inputs:
 --    --r: An Integer representing how many rows the instruciton grid will contain.
 --    --c: An Integer representing how many columns the instruciton grid will contain.
 --    --The rest of the input will be a sequence of characters to populate the grid.
@@ -52,11 +52,6 @@ procedure Befunge is
    package myStackPkg is new StackPkg(Size => 1000, ItemType => Integer);
    use myStackPkg;
 
-
-   --[Main loop fields]
-   --TODO: should this be declared here? Better suited when the grid is instantiated?
-   s: Stack;
-
    --Grid dimensions that will be obtained from input file
    rows : Integer := 0;
    columns : Integer := 0;
@@ -74,6 +69,7 @@ begin
    GetRowsAndColumns(rows, columns);
 
    declare
+      s: Stack;
       --Instantiate the grid given the row and column inputs
       instructionGrid : Grid(1..rows, 1..columns);
       instrPointer : InstructionPointer;
@@ -239,7 +235,7 @@ begin
          --If the pointer is in bounds, perform the instruction, then move to the next position
          else
             PerformInstruction(instructionGrid(instrPointer.pos.y, instrPointer.pos.x));
-            ChangeGridPosition (instrPointer);
+            ChangeGridPosition(instrPointer);
          end if;
          
       end loop;
